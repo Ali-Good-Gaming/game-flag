@@ -1,0 +1,2063 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Угадай флаги | ALI_Good_Gaming</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        :root {
+            --primary: #1a237e;
+            --secondary: #3949ab;
+            --accent: #00bcd4;
+            --success: #4caf50;
+            --warning: #ff9800;
+            --danger: #f44336;
+            --light: #f5f5f5;
+            --dark: #121212;
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            background: linear-gradient(-45deg, #0f0c29, #302b63, #24243e, #1a1a2e);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            color: var(--light);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Анимированный фон с флагами */
+        .flag-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.1;
+            pointer-events: none;
+        }
+
+        .flag-particle {
+            position: absolute;
+            width: 60px;
+            height: 40px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            opacity: 0;
+            animation: floatFlag 20s linear infinite;
+        }
+
+        @keyframes floatFlag {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.7;
+            }
+            90% {
+                opacity: 0.7;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Контейнер игры */
+        .game-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Стили для экранов */
+        .screen {
+            display: none;
+            width: 100%;
+            max-width: 900px;
+            background: rgba(18, 18, 18, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.5s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Главное меню */
+        .main-menu {
+            text-align: center;
+        }
+
+        .game-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 4rem;
+            font-weight: 900;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #00bcd4, #3949ab, #1a237e);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 5px 15px rgba(0, 188, 212, 0.3);
+            letter-spacing: 2px;
+            animation: titleGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes titleGlow {
+            from { text-shadow: 0 5px 15px rgba(0, 188, 212, 0.3); }
+            to { text-shadow: 0 5px 25px rgba(0, 188, 212, 0.7), 0 0 30px rgba(0, 188, 212, 0.4); }
+        }
+
+        .game-subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+            color: #aaa;
+            font-weight: 300;
+        }
+
+        .menu-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin: 40px 0;
+        }
+
+        .menu-btn {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 18px 30px;
+            font-size: 1.4rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 600;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .menu-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+            background: linear-gradient(45deg, var(--secondary), var(--accent));
+        }
+
+        .menu-btn:active {
+            transform: translateY(0);
+        }
+
+        .menu-btn:after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+        }
+
+        .menu-btn:focus:not(:active)::after {
+            animation: ripple 1s ease-out;
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 0.5;
+            }
+            100% {
+                transform: scale(20, 20);
+                opacity: 0;
+            }
+        }
+
+        /* Социальные сети */
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin-top: 50px;
+        }
+
+        .social-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1.8rem;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+
+        .social-link:hover {
+            background: var(--accent);
+            transform: translateY(-5px) rotate(5deg);
+            box-shadow: 0 5px 15px rgba(0, 188, 212, 0.4);
+        }
+
+        /* Экран выбора режима */
+        .mode-selection h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            color: var(--accent);
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .mode-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .mode-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            transition: var(--transition);
+            border: 1px solid transparent;
+            cursor: pointer;
+        }
+
+        .mode-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--accent);
+            box-shadow: 0 10px 20px rgba(0, 188, 212, 0.2);
+        }
+
+        .mode-card i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: var(--accent);
+        }
+
+        .mode-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .mode-card p {
+            color: #aaa;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* Экран игры */
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .game-stats {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .flag-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .flag-img {
+            max-width: 100%;
+            height: 200px;
+            object-fit: contain;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .answers-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        @media (max-width: 768px) {
+            .answers-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .answer-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid transparent;
+            padding: 20px;
+            border-radius: 10px;
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+        }
+
+        .answer-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: var(--accent);
+        }
+
+        .answer-btn.correct {
+            background: rgba(76, 175, 80, 0.3);
+            border-color: var(--success);
+            animation: pulseCorrect 0.5s;
+        }
+
+        .answer-btn.wrong {
+            background: rgba(244, 67, 54, 0.3);
+            border-color: var(--danger);
+            animation: shake 0.5s;
+        }
+
+        @keyframes pulseCorrect {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        .progress-container {
+            margin: 30px 0;
+        }
+
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            height: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        /* Кнопки управления */
+        .control-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border-radius: 50px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-back {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Экран континентов */
+        .continents-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .continent-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 2px solid transparent;
+            position: relative;
+        }
+
+        .continent-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--accent);
+        }
+
+        .continent-card.completed {
+            border-color: var(--success);
+        }
+
+        .continent-card.completed:after {
+            content: '✓';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--success);
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .continent-card i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: var(--accent);
+        }
+
+        .continent-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        /* Настройки */
+        .settings-container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .settings-group {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+        }
+
+        .settings-group h3 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .settings-group h3 i {
+            font-size: 1.3rem;
+        }
+
+        .setting {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 15px 0;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .setting:last-child {
+            border-bottom: none;
+        }
+
+        .slider {
+            width: 60%;
+            -webkit-appearance: none;
+            height: 8px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+        }
+
+        .toggle {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            cursor: pointer;
+        }
+
+        .toggle:after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--accent);
+            transition: var(--transition);
+        }
+
+        .toggle.active:after {
+            transform: translateX(30px);
+        }
+
+        .language-selector {
+            display: flex;
+            gap: 10px;
+        }
+
+        .lang-btn {
+            padding: 8px 20px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .lang-btn.active {
+            background: var(--accent);
+        }
+
+        /* Экран рекордов */
+        .records-container {
+            overflow-x: auto;
+        }
+
+        .records-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .records-table th {
+            background: rgba(0, 188, 212, 0.2);
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .records-table td {
+            padding: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .records-table tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .records-table .rank {
+            font-weight: bold;
+            color: var(--accent);
+            font-size: 1.2rem;
+        }
+
+        /* Экран завершения игры */
+        .result-screen {
+            text-align: center;
+        }
+
+        .result-title {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: var(--accent);
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .result-stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin: 30px 0;
+        }
+
+        .result-stat {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 15px;
+            min-width: 150px;
+        }
+
+        .result-stat h3 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #aaa;
+        }
+
+        .result-stat p {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .name-input-container {
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .name-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid var(--accent);
+            border-radius: 10px;
+            padding: 15px;
+            color: white;
+            font-size: 1.2rem;
+            width: 100%;
+            max-width: 400px;
+            margin-top: 10px;
+        }
+
+        /* Таймер */
+        .timer {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            color: var(--accent);
+            text-shadow: 0 0 10px rgba(0, 188, 212, 0.5);
+            animation: pulse 1s infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { opacity: 0.8; }
+            to { opacity: 1; }
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .game-title {
+                font-size: 2.5rem;
+            }
+            
+            .screen {
+                padding: 25px;
+            }
+            
+            .game-stats {
+                justify-content: center;
+            }
+            
+            .mode-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .continents-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .game-title {
+                font-size: 2rem;
+            }
+            
+            .menu-btn {
+                padding: 15px 20px;
+                font-size: 1.2rem;
+            }
+            
+            .continents-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .social-links {
+                gap: 15px;
+            }
+            
+            .social-link {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
+            }
+        }
+
+        /* Уведомления */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--success);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            transform: translateX(150%);
+            transition: transform 0.5s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.error {
+            background: var(--danger);
+        }
+    </style>
+</head>
+<body>
+    <!-- Анимированный фон с флагами -->
+    <div class="flag-bg" id="flagBg"></div>
+    
+    <!-- Уведомления -->
+    <div class="notification" id="notification"></div>
+    
+    <!-- Контейнер игры -->
+    <div class="game-container">
+        <!-- Главное меню -->
+        <div class="screen main-menu active" id="mainMenu">
+            <h1 class="game-title">УГАДАЙ ФЛАГИ</h1>
+            <p class="game-subtitle">from ALI_Good_Gaming</p>
+            
+            <div class="menu-buttons">
+                <button class="menu-btn" id="playBtn">
+                    <i class="fas fa-play"></i> Играть
+                </button>
+                <button class="menu-btn" id="recordsBtn">
+                    <i class="fas fa-trophy"></i> Рекорды
+                </button>
+                <button class="menu-btn" id="settingsBtn">
+                    <i class="fas fa-cog"></i> Настройки
+                </button>
+            </div>
+            
+            <div class="social-links">
+                <a href="https://youtube.com/ALI_Good_Gaming" class="social-link" target="_blank">
+                    <i class="fab fa-youtube"></i>
+                </a>
+                <a href="https://t.me/ALI_Good_Gaming" class="social-link" target="_blank">
+                    <i class="fab fa-telegram"></i>
+                </a>
+                <a href="https://tiktok.com/@ALI_Good_Gaming" class="social-link" target="_blank">
+                    <i class="fab fa-tiktok"></i>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Выбор режима -->
+        <div class="screen mode-selection" id="modeSelection">
+            <h2><i class="fas fa-gamepad"></i> Выберите режим</h2>
+            
+            <div class="mode-cards">
+                <div class="mode-card" id="classicMode">
+                    <i class="fas fa-globe-americas"></i>
+                    <h3>Классический</h3>
+                    <p>Все страны, все флаги. Проверьте свои знания флагов всех стран мира, включая Тайвань.</p>
+                </div>
+                
+                <div class="mode-card" id="continentMode">
+                    <i class="fas fa-map"></i>
+                    <h3>По континентам</h3>
+                    <p>Изучайте флаги по частям света. Выбирайте континент и проходите его полностью.</p>
+                </div>
+                
+                <div class="mode-card" id="timeMode">
+                    <i class="fas fa-stopwatch"></i>
+                    <h3>На время</h3>
+                    <p>Угадывайте флаги на скорость. Установите лимит времени и попытайтесь побить рекорд!</p>
+                </div>
+            </div>
+            
+            <div class="control-buttons">
+                <button class="btn btn-back" id="backToMenuFromModes">
+                    <i class="fas fa-arrow-left"></i> Назад
+                </button>
+            </div>
+        </div>
+        
+        <!-- Выбор континента -->
+        <div class="screen continent-selection" id="continentSelection">
+            <h2><i class="fas fa-earth-americas"></i> Выберите континент</h2>
+            
+            <div class="continents-container" id="continentsContainer">
+                <!-- Континенты будут добавлены динамически -->
+            </div>
+            
+            <div class="control-buttons">
+                <button class="btn btn-back" id="backToModesFromContinents">
+                    <i class="fas fa-arrow-left"></i> Назад
+                </button>
+            </div>
+        </div>
+        
+        <!-- Экран игры (классический и по континентам) -->
+        <div class="screen game-screen" id="gameScreen">
+            <div class="game-header">
+                <div class="game-stats">
+                    <div class="stat" id="remainingCounter">Осталось: 0</div>
+                    <div class="stat" id="scoreCounter">Счёт: 0</div>
+                    <div class="stat timer" id="timerDisplay" style="display: none;">00:00</div>
+                </div>
+                
+                <button class="btn btn-back" id="backFromGame">
+                    <i class="fas fa-arrow-left"></i> Выйти
+                </button>
+            </div>
+            
+            <div class="progress-container">
+                <div class="progress-text">
+                    <span>Прогресс</span>
+                    <span id="progressText">0/0</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+            
+            <div class="flag-container">
+                <img class="flag-img" id="flagImage" src="" alt="Флаг">
+            </div>
+            
+            <div class="answers-container" id="answersContainer">
+                <!-- Ответы будут добавлены динамически -->
+            </div>
+            
+            <div class="control-buttons">
+                <button class="btn btn-primary" id="nextFlagBtn" style="display: none;">
+                    Далее <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Экран игры на время -->
+        <div class="screen time-mode-setup" id="timeModeSetup">
+            <h2><i class="fas fa-stopwatch"></i> Игра на время</h2>
+            
+            <div class="settings-group">
+                <h3><i class="fas fa-clock"></i> Установите время</h3>
+                <div class="setting">
+                    <span>Лимит времени (секунды)</span>
+                    <input type="range" min="30" max="300" value="60" class="slider" id="timeLimitSlider">
+                    <span id="timeLimitValue">60 сек</span>
+                </div>
+            </div>
+            
+            <div class="control-buttons">
+                <button class="btn btn-back" id="backToModesFromTimeSetup">
+                    <i class="fas fa-arrow-left"></i> Назад
+                </button>
+                <button class="btn btn-primary" id="startTimeMode">
+                    <i class="fas fa-play"></i> Начать игру
+                </button>
+            </div>
+        </div>
+        
+        <!-- Экран результатов -->
+        <div class="screen result-screen" id="resultScreen">
+            <h1 class="result-title" id="resultTitle">Поздравляем!</h1>
+            
+            <div class="result-stats" id="resultStats">
+                <!-- Статистика будет добавлена динамически -->
+            </div>
+            
+            <div class="name-input-container" id="nameInputContainer" style="display: none;">
+                <h3>Введите имя для таблицы рекордов:</h3>
+                <input type="text" class="name-input" id="playerName" placeholder="Ваше имя" maxlength="20">
+                <button class="btn btn-primary" id="saveRecordBtn" style="margin-top: 20px;">
+                    Сохранить рекорд
+                </button>
+            </div>
+            
+            <div class="control-buttons">
+                <button class="btn btn-back" id="backToMenuFromResult">
+                    <i class="fas fa-home"></i> В главное меню
+                </button>
+                <button class="btn btn-primary" id="playAgainBtn">
+                    <i class="fas fa-redo"></i> Играть снова
+                </button>
+            </div>
+        </div>
+        
+        <!-- Экран рекордов -->
+        <div class="screen records-screen" id="recordsScreen">
+            <h2><i class="fas fa-trophy"></i> Таблица рекордов</h2>
+            <p>Лучшие результаты в режиме "На время"</p>
+            
+            <div class="records-container">
+                <table class="records-table" id="recordsTable">
+                    <thead>
+                        <tr>
+                            <th>Место</th>
+                            <th>Имя</th>
+                            <th>Флагов угадано</th>
+                            <th>Время</th>
+                            <th>Дата</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recordsTableBody">
+                        <!-- Записи рекордов будут добавлены динамически -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="control-buttons">
+                <button class="btn btn-back" id="backToMenuFromRecords">
+                    <i class="fas fa-arrow-left"></i> Назад
+                </button>
+            </div>
+        </div>
+        
+        <!-- Экран настроек -->
+        <div class="screen settings-screen" id="settingsScreen">
+            <h2><i class="fas fa-cog"></i> Настройки</h2>
+            
+            <div class="settings-container">
+                <div class="settings-group">
+                    <h3><i class="fas fa-volume-up"></i> Звук</h3>
+                    
+                    <div class="setting">
+                        <span>Фоновая музыка</span>
+                        <div class="toggle" id="musicToggle">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="setting">
+                        <span>Громкость музыки</span>
+                        <input type="range" min="0" max="100" value="50" class="slider" id="musicVolumeSlider">
+                    </div>
+                    
+                    <div class="setting">
+                        <span>Звуки кнопок</span>
+                        <div class="toggle active" id="soundsToggle">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="setting">
+                        <span>Громкость звуков</span>
+                        <input type="range" min="0" max="100" value="70" class="slider" id="soundsVolumeSlider">
+                    </div>
+                </div>
+                
+                <div class="settings-group">
+                    <h3><i class="fas fa-language"></i> Язык</h3>
+                    
+                    <div class="setting">
+                        <span>Язык интерфейса</span>
+                        <div class="language-selector">
+                            <button class="lang-btn active" data-lang="ru">Русский</button>
+                            <button class="lang-btn" data-lang="en">English</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="settings-group">
+                    <h3><i class="fas fa-palette"></i> Внешний вид</h3>
+                    
+                    <div class="setting">
+                        <span>Анимации</span>
+                        <div class="toggle active" id="animationsToggle">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="setting">
+                        <span>Сложность (количество вариантов)</span>
+                        <input type="range" min="2" max="6" value="4" class="slider" id="difficultySlider">
+                        <span id="difficultyValue">4 варианта</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="control-buttons">
+                <button class="btn btn-back" id="backToMenuFromSettings">
+                    <i class="fas fa-arrow-left"></i> Назад
+                </button>
+                <button class="btn btn-primary" id="resetSettingsBtn">
+                    <i class="fas fa-undo"></i> Сбросить настройки
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Аудио элементы -->
+    <audio id="clickSound" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="correctSound" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="wrongSound" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="bgMusic" loop preload="auto">
+        <source src="https://assets.mixkit.co/music/preview/mixkit-game-show-suspense-waiting-667.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="winSound" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        // Игровые данные и состояния
+        const gameState = {
+            currentScreen: 'mainMenu',
+            currentMode: null,
+            currentContinent: null,
+            countries: [],
+            currentCountryIndex: 0,
+            score: 0,
+            totalCountries: 0,
+            remainingCountries: 0,
+            timeLimit: 60,
+            timeLeft: 60,
+            timerInterval: null,
+            isTimeMode: false,
+            gameCompleted: false,
+            selectedAnswers: [],
+            correctAnswersCount: 0,
+            usedCountries: [],
+            playerName: '',
+            language: 'ru',
+            soundsEnabled: true,
+            musicEnabled: true,
+            animationsEnabled: true,
+            musicVolume: 0.5,
+            soundsVolume: 0.7,
+            difficulty: 4,
+            completedContinents: JSON.parse(localStorage.getItem('completedContinents')) || []
+        };
+
+        // Данные о странах и флагах
+        const countriesData = [
+            // Европа
+            { name: 'Россия', code: 'ru', continent: 'europe' },
+            { name: 'Германия', code: 'de', continent: 'europe' },
+            { name: 'Франция', code: 'fr', continent: 'europe' },
+            { name: 'Италия', code: 'it', continent: 'europe' },
+            { name: 'Испания', code: 'es', continent: 'europe' },
+            { name: 'Великобритания', code: 'gb', continent: 'europe' },
+            { name: 'Украина', code: 'ua', continent: 'europe' },
+            { name: 'Польша', code: 'pl', continent: 'europe' },
+            { name: 'Швеция', code: 'se', continent: 'europe' },
+            { name: 'Норвегия', code: 'no', continent: 'europe' },
+            
+            // Азия
+            { name: 'Китай', code: 'cn', continent: 'asia' },
+            { name: 'Япония', code: 'jp', continent: 'asia' },
+            { name: 'Индия', code: 'in', continent: 'asia' },
+            { name: 'Южная Корея', code: 'kr', continent: 'asia' },
+            { name: 'Тайвань', code: 'tw', continent: 'asia' },
+            { name: 'Турция', code: 'tr', continent: 'asia' },
+            { name: 'Саудовская Аравия', code: 'sa', continent: 'asia' },
+            { name: 'Израиль', code: 'il', continent: 'asia' },
+            { name: 'Иран', code: 'ir', continent: 'asia' },
+            { name: 'Таиланд', code: 'th', continent: 'asia' },
+            
+            // Африка
+            { name: 'Египет', code: 'eg', continent: 'africa' },
+            { name: 'ЮАР', code: 'za', continent: 'africa' },
+            { name: 'Нигерия', code: 'ng', continent: 'africa' },
+            { name: 'Кения', code: 'ke', continent: 'africa' },
+            { name: 'Марокко', code: 'ma', continent: 'africa' },
+            { name: 'Эфиопия', code: 'et', continent: 'africa' },
+            { name: 'Гана', code: 'gh', continent: 'africa' },
+            { name: 'Алжир', code: 'dz', continent: 'africa' },
+            { name: 'Тунис', code: 'tn', continent: 'africa' },
+            { name: 'Ангола', code: 'ao', continent: 'africa' },
+            
+            // Америка
+            { name: 'США', code: 'us', continent: 'america' },
+            { name: 'Канада', code: 'ca', continent: 'america' },
+            { name: 'Бразилия', code: 'br', continent: 'america' },
+            { name: 'Мексика', code: 'mx', continent: 'america' },
+            { name: 'Аргентина', code: 'ar', continent: 'america' },
+            { name: 'Чили', code: 'cl', continent: 'america' },
+            { name: 'Колумбия', code: 'co', continent: 'america' },
+            { name: 'Перу', code: 'pe', continent: 'america' },
+            { name: 'Куба', code: 'cu', continent: 'america' },
+            { name: 'Венесуэла', code: 've', continent: 'america' },
+            
+            // Океания
+            { name: 'Австралия', code: 'au', continent: 'oceania' },
+            { name: 'Новая Зеландия', code: 'nz', continent: 'oceania' },
+            { name: 'Фиджи', code: 'fj', continent: 'oceania' },
+            { name: 'Папуа - Новая Гвинея', code: 'pg', continent: 'oceania' },
+            { name: 'Самоа', code: 'ws', continent: 'oceania' },
+            { name: 'Тонга', code: 'to', continent: 'oceania' },
+            { name: 'Вануату', code: 'vu', continent: 'oceania' },
+            { name: 'Соломоновы Острова', code: 'sb', continent: 'oceania' }
+        ];
+
+        // Данные о континентах
+        const continentsData = [
+            { id: 'europe', name: 'Европа', icon: 'fas fa-landmark', color: '#3498db', count: 10 },
+            { id: 'asia', name: 'Азия', icon: 'fas fa-globe-asia', color: '#e74c3c', count: 10 },
+            { id: 'africa', name: 'Африка', icon: 'fas fa-globe-africa', color: '#f39c12', count: 10 },
+            { id: 'america', name: 'Америка', icon: 'fas fa-globe-americas', color: '#2ecc71', count: 10 },
+            { id: 'oceania', name: 'Океания', icon: 'fas fa-umbrella-beach', color: '#9b59b6', count: 8 }
+        ];
+
+        // Тексты на разных языках
+        const translations = {
+            ru: {
+                gameTitle: "УГАДАЙ ФЛАГИ",
+                from: "from ALI_Good_Gaming",
+                play: "Играть",
+                records: "Рекорды",
+                settings: "Настройки",
+                selectMode: "Выберите режим",
+                classicMode: "Классический",
+                classicDesc: "Все страны, все флаги. Проверьте свои знания флагов всех стран мира, включая Тайвань.",
+                continentMode: "По континентам",
+                continentDesc: "Изучайте флаги по частям света. Выбирайте континент и проходите его полностью.",
+                timeMode: "На время",
+                timeDesc: "Угадывайте флаги на скорость. Установите лимит времени и попытайтесь побить рекорд!",
+                selectContinent: "Выберите континент",
+                remaining: "Осталось",
+                score: "Счёт",
+                progress: "Прогресс",
+                nextFlag: "Далее",
+                exit: "Выйти",
+                back: "Назад",
+                timeLimit: "Лимит времени (секунды)",
+                startGame: "Начать игру",
+                congratulations: "Поздравляем!",
+                youCompleted: "Вы завершили режим",
+                flagsGuessed: "Флагов угадано",
+                correctAnswers: "Правильных ответов",
+                timeSpent: "Затрачено времени",
+                enterName: "Введите имя для таблицы рекордов",
+                saveRecord: "Сохранить рекорд",
+                backToMenu: "В главное меню",
+                playAgain: "Играть снова",
+                recordsTitle: "Таблица рекордов",
+                recordsDesc: "Лучшие результаты в режиме 'На время'",
+                place: "Место",
+                name: "Имя",
+                flags: "Флагов угадано",
+                time: "Время",
+                date: "Дата",
+                settingsTitle: "Настройки",
+                music: "Фоновая музыка",
+                musicVolume: "Громкость музыки",
+                sounds: "Звуки кнопок",
+                soundsVolume: "Громкость звуков",
+                language: "Язык интерфейса",
+                appearance: "Внешний вид",
+                animations: "Анимации",
+                difficulty: "Сложность (количество вариантов)",
+                resetSettings: "Сбросить настройки",
+                variants: "варианта",
+                seconds: "сек",
+                completed: "Завершено"
+            },
+            en: {
+                gameTitle: "GUESS THE FLAGS",
+                from: "from ALI_Good_Gaming",
+                play: "Play",
+                records: "Records",
+                settings: "Settings",
+                selectMode: "Select mode",
+                classicMode: "Classic",
+                classicDesc: "All countries, all flags. Test your knowledge of flags from all over the world, including Taiwan.",
+                continentMode: "By Continents",
+                continentDesc: "Study flags by parts of the world. Choose a continent and complete it fully.",
+                timeMode: "Time Attack",
+                timeDesc: "Guess flags against the clock. Set a time limit and try to beat the record!",
+                selectContinent: "Select continent",
+                remaining: "Remaining",
+                score: "Score",
+                progress: "Progress",
+                nextFlag: "Next",
+                exit: "Exit",
+                back: "Back",
+                timeLimit: "Time limit (seconds)",
+                startGame: "Start Game",
+                congratulations: "Congratulations!",
+                youCompleted: "You completed the mode",
+                flagsGuessed: "Flags guessed",
+                correctAnswers: "Correct answers",
+                timeSpent: "Time spent",
+                enterName: "Enter your name for the records table",
+                saveRecord: "Save Record",
+                backToMenu: "Back to Menu",
+                playAgain: "Play Again",
+                recordsTitle: "Records Table",
+                recordsDesc: "Best results in 'Time Attack' mode",
+                place: "Place",
+                name: "Name",
+                flags: "Flags guessed",
+                time: "Time",
+                date: "Date",
+                settingsTitle: "Settings",
+                music: "Background Music",
+                musicVolume: "Music Volume",
+                sounds: "Button Sounds",
+                soundsVolume: "Sounds Volume",
+                language: "Interface Language",
+                appearance: "Appearance",
+                animations: "Animations",
+                difficulty: "Difficulty (number of options)",
+                resetSettings: "Reset Settings",
+                variants: "variants",
+                seconds: "sec",
+                completed: "Completed"
+            }
+        };
+
+        // Инициализация игры
+        document.addEventListener('DOMContentLoaded', () => {
+            // Загрузка сохраненных настроек
+            loadSettings();
+            
+            // Инициализация фоновых флагов
+            initFlagBackground();
+            
+            // Настройка обработчиков событий
+            setupEventListeners();
+            
+            // Воспроизведение фоновой музыки
+            playBackgroundMusic();
+            
+            // Обновление интерфейса на текущем языке
+            updateLanguage();
+        });
+
+        // Инициализация анимированного фона с флагами
+        function initFlagBackground() {
+            const flagBg = document.getElementById('flagBg');
+            const flagCount = 20;
+            
+            for (let i = 0; i < flagCount; i++) {
+                const flag = document.createElement('div');
+                flag.className = 'flag-particle';
+                
+                // Случайный флаг из списка стран
+                const randomCountry = countriesData[Math.floor(Math.random() * countriesData.length)];
+                flag.style.backgroundImage = `url(https://flagcdn.com/w320/${randomCountry.code}.png)`;
+                
+                // Случайная позиция и анимация
+                flag.style.left = `${Math.random() * 100}%`;
+                flag.style.animationDelay = `${Math.random() * 20}s`;
+                flag.style.animationDuration = `${15 + Math.random() * 20}s`;
+                flag.style.opacity = `${0.1 + Math.random() * 0.2}`;
+                flag.style.width = `${40 + Math.random() * 40}px`;
+                flag.style.height = `${30 + Math.random() * 30}px`;
+                
+                flagBg.appendChild(flag);
+            }
+        }
+
+        // Настройка обработчиков событий
+        function setupEventListeners() {
+            // Кнопки главного меню
+            document.getElementById('playBtn').addEventListener('click', () => switchScreen('modeSelection'));
+            document.getElementById('recordsBtn').addEventListener('click', () => {
+                loadRecords();
+                switchScreen('recordsScreen');
+            });
+            document.getElementById('settingsBtn').addEventListener('click', () => switchScreen('settingsScreen'));
+            
+            // Кнопки выбора режима
+            document.getElementById('classicMode').addEventListener('click', () => startClassicMode());
+            document.getElementById('continentMode').addEventListener('click', () => {
+                loadContinents();
+                switchScreen('continentSelection');
+            });
+            document.getElementById('timeMode').addEventListener('click', () => switchScreen('timeModeSetup'));
+            
+            // Кнопки назад
+            document.getElementById('backToMenuFromModes').addEventListener('click', () => switchScreen('mainMenu'));
+            document.getElementById('backToModesFromContinents').addEventListener('click', () => switchScreen('modeSelection'));
+            document.getElementById('backFromGame').addEventListener('click', exitGame);
+            document.getElementById('backToModesFromTimeSetup').addEventListener('click', () => switchScreen('modeSelection'));
+            document.getElementById('backToMenuFromResult').addEventListener('click', () => switchScreen('mainMenu'));
+            document.getElementById('backToMenuFromRecords').addEventListener('click', () => switchScreen('mainMenu'));
+            document.getElementById('backToMenuFromSettings').addEventListener('click', () => switchScreen('mainMenu'));
+            
+            // Игровые кнопки
+            document.getElementById('nextFlagBtn').addEventListener('click', nextFlag);
+            document.getElementById('startTimeMode').addEventListener('click', startTimeMode);
+            document.getElementById('playAgainBtn').addEventListener('click', playAgain);
+            document.getElementById('saveRecordBtn').addEventListener('click', saveRecord);
+            
+            // Настройки
+            document.getElementById('musicToggle').addEventListener('click', toggleMusic);
+            document.getElementById('soundsToggle').addEventListener('click', toggleSounds);
+            document.getElementById('animationsToggle').addEventListener('click', toggleAnimations);
+            
+            document.getElementById('musicVolumeSlider').addEventListener('input', updateMusicVolume);
+            document.getElementById('soundsVolumeSlider').addEventListener('input', updateSoundsVolume);
+            document.getElementById('difficultySlider').addEventListener('input', updateDifficulty);
+            document.getElementById('timeLimitSlider').addEventListener('input', updateTimeLimit);
+            
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.addEventListener('click', () => switchLanguage(btn.dataset.lang));
+            });
+            
+            document.getElementById('resetSettingsBtn').addEventListener('click', resetSettings);
+        }
+
+        // Переключение экранов
+        function switchScreen(screenId) {
+            playSound('click');
+            
+            // Скрыть все экраны
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            
+            // Показать нужный экран
+            document.getElementById(screenId).classList.add('active');
+            gameState.currentScreen = screenId;
+            
+            // Остановить таймер при выходе из игрового экрана
+            if (screenId !== 'gameScreen' && gameState.timerInterval) {
+                clearInterval(gameState.timerInterval);
+                gameState.timerInterval = null;
+            }
+        }
+
+        // Загрузка континентов
+        function loadContinents() {
+            const container = document.getElementById('continentsContainer');
+            container.innerHTML = '';
+            
+            const lang = gameState.language;
+            
+            continentsData.forEach(continent => {
+                const isCompleted = gameState.completedContinents.includes(continent.id);
+                
+                const card = document.createElement('div');
+                card.className = `continent-card ${isCompleted ? 'completed' : ''}`;
+                card.dataset.continent = continent.id;
+                
+                card.innerHTML = `
+                    <i class="${continent.icon}" style="color: ${continent.color}"></i>
+                    <h3>${continent.name}</h3>
+                    <p>${continent.count} стран</p>
+                    ${isCompleted ? `<p><strong>${translations[lang].completed}</strong></p>` : ''}
+                `;
+                
+                card.addEventListener('click', () => startContinentMode(continent.id));
+                container.appendChild(card);
+            });
+        }
+
+        // Начать классический режим
+        function startClassicMode() {
+            gameState.currentMode = 'classic';
+            gameState.isTimeMode = false;
+            
+            // Перемешиваем все страны
+            gameState.countries = [...countriesData].sort(() => Math.random() - 0.5);
+            gameState.totalCountries = gameState.countries.length;
+            gameState.remainingCountries = gameState.totalCountries;
+            gameState.score = 0;
+            gameState.currentCountryIndex = 0;
+            gameState.usedCountries = [];
+            
+            startGame();
+        }
+
+        // Начать режим по континентам
+        function startContinentMode(continentId) {
+            gameState.currentMode = 'continent';
+            gameState.currentContinent = continentId;
+            gameState.isTimeMode = false;
+            
+            // Фильтруем страны по континенту
+            gameState.countries = countriesData
+                .filter(country => country.continent === continentId)
+                .sort(() => Math.random() - 0.5);
+                
+            gameState.totalCountries = gameState.countries.length;
+            gameState.remainingCountries = gameState.totalCountries;
+            gameState.score = 0;
+            gameState.currentCountryIndex = 0;
+            gameState.usedCountries = [];
+            
+            startGame();
+        }
+
+        // Начать режим на время
+        function startTimeMode() {
+            gameState.currentMode = 'time';
+            gameState.isTimeMode = true;
+            
+            // Перемешиваем все страны
+            gameState.countries = [...countriesData].sort(() => Math.random() - 0.5);
+            gameState.totalCountries = gameState.countries.length;
+            gameState.remainingCountries = gameState.totalCountries;
+            gameState.score = 0;
+            gameState.currentCountryIndex = 0;
+            gameState.usedCountries = [];
+            gameState.timeLeft = gameState.timeLimit;
+            
+            startGame();
+            startTimer();
+        }
+
+        // Начать игру
+        function startGame() {
+            updateGameStats();
+            loadCurrentFlag();
+            switchScreen('gameScreen');
+        }
+
+        // Загрузка текущего флага
+        function loadCurrentFlag() {
+            if (gameState.currentCountryIndex >= gameState.countries.length) {
+                endGame();
+                return;
+            }
+            
+            const currentCountry = gameState.countries[gameState.currentCountryIndex];
+            const flagImage = document.getElementById('flagImage');
+            
+            // Загружаем флаг с сервиса FlagCDN
+            flagImage.src = `https://flagcdn.com/w320/${currentCountry.code}.png`;
+            flagImage.alt = currentCountry.name;
+            
+            // Генерируем варианты ответов
+            generateAnswerOptions(currentCountry);
+            
+            // Прячем кнопку "Далее"
+            document.getElementById('nextFlagBtn').style.display = 'none';
+            
+            // Обновляем прогресс
+            updateProgress();
+        }
+
+        // Генерация вариантов ответов
+        function generateAnswerOptions(correctCountry) {
+            const answersContainer = document.getElementById('answersContainer');
+            answersContainer.innerHTML = '';
+            
+            // Получаем список неправильных ответов
+            const wrongAnswers = getWrongAnswers(correctCountry);
+            
+            // Смешиваем правильный ответ с неправильными
+            const allAnswers = [correctCountry.name, ...wrongAnswers]
+                .sort(() => Math.random() - 0.5);
+            
+            // Создаем кнопки для каждого ответа
+            allAnswers.forEach(answer => {
+                const button = document.createElement('button');
+                button.className = 'answer-btn';
+                button.textContent = answer;
+                
+                button.addEventListener('click', () => checkAnswer(answer, correctCountry.name, button));
+                answersContainer.appendChild(button);
+            });
+        }
+
+        // Получение неправильных ответов
+        function getWrongAnswers(correctCountry) {
+            const wrongAnswers = [];
+            const usedNames = new Set([correctCountry.name]);
+            
+            // Получаем страны из того же континента или все страны в классическом режиме
+            let candidateCountries = gameState.currentMode === 'continent' 
+                ? countriesData.filter(c => c.continent === gameState.currentContinent && c.name !== correctCountry.name)
+                : countriesData.filter(c => c.name !== correctCountry.name);
+            
+            // Перемешиваем кандидатов
+            candidateCountries = [...candidateCountries].sort(() => Math.random() - 0.5);
+            
+            // Выбираем нужное количество неправильных ответов
+            const neededWrongAnswers = gameState.difficulty - 1;
+            
+            for (let i = 0; i < candidateCountries.length && wrongAnswers.length < neededWrongAnswers; i++) {
+                const candidate = candidateCountries[i].name;
+                if (!usedNames.has(candidate)) {
+                    wrongAnswers.push(candidate);
+                    usedNames.add(candidate);
+                }
+            }
+            
+            return wrongAnswers;
+        }
+
+        // Проверка ответа
+        function checkAnswer(selectedAnswer, correctAnswer, button) {
+            if (gameState.selectedAnswers.includes(gameState.currentCountryIndex)) {
+                return; // Уже отвечали на этот флаг
+            }
+            
+            playSound(selectedAnswer === correctAnswer ? 'correct' : 'wrong');
+            
+            // Запоминаем, что ответили на этот флаг
+            gameState.selectedAnswers.push(gameState.currentCountryIndex);
+            
+            // Отмечаем правильные/неправильные ответы
+            document.querySelectorAll('.answer-btn').forEach(btn => {
+                btn.disabled = true;
+                if (btn.textContent === correctAnswer) {
+                    btn.classList.add('correct');
+                } else if (btn.textContent === selectedAnswer && selectedAnswer !== correctAnswer) {
+                    btn.classList.add('wrong');
+                }
+            });
+            
+            // Обновляем счет и статистику
+            if (selectedAnswer === correctAnswer) {
+                gameState.score++;
+                gameState.correctAnswersCount++;
+            }
+            
+            gameState.remainingCountries--;
+            updateGameStats();
+            
+            // Показываем кнопку "Далее"
+            document.getElementById('nextFlagBtn').style.display = 'block';
+        }
+
+        // Следующий флаг
+        function nextFlag() {
+            playSound('click');
+            gameState.currentCountryIndex++;
+            
+            if (gameState.currentCountryIndex >= gameState.countries.length) {
+                endGame();
+            } else {
+                loadCurrentFlag();
+            }
+        }
+
+        // Обновление игровой статистики
+        function updateGameStats() {
+            const lang = gameState.language;
+            
+            document.getElementById('remainingCounter').textContent = 
+                `${translations[lang].remaining}: ${gameState.remainingCountries}`;
+            document.getElementById('scoreCounter').textContent = 
+                `${translations[lang].score}: ${gameState.score}`;
+            
+            // Обновляем таймер, если режим на время
+            if (gameState.isTimeMode) {
+                document.getElementById('timerDisplay').style.display = 'block';
+                updateTimerDisplay();
+            } else {
+                document.getElementById('timerDisplay').style.display = 'none';
+            }
+        }
+
+        // Обновление прогресса
+        function updateProgress() {
+            const progress = gameState.currentCountryIndex + 1;
+            const total = gameState.countries.length;
+            const percentage = (progress / total) * 100;
+            
+            const lang = gameState.language;
+            document.getElementById('progressText').textContent = `${progress}/${total}`;
+            document.getElementById('progressFill').style.width = `${percentage}%`;
+        }
+
+        // Запуск таймера
+        function startTimer() {
+            if (gameState.timerInterval) {
+                clearInterval(gameState.timerInterval);
+            }
+            
+            gameState.timerInterval = setInterval(() => {
+                gameState.timeLeft--;
+                updateTimerDisplay();
+                
+                if (gameState.timeLeft <= 0) {
+                    clearInterval(gameState.timerInterval);
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        // Обновление отображения таймера
+        function updateTimerDisplay() {
+            const minutes = Math.floor(gameState.timeLeft / 60);
+            const seconds = gameState.timeLeft % 60;
+            document.getElementById('timerDisplay').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Завершение игры
+        function endGame() {
+            if (gameState.timerInterval) {
+                clearInterval(gameState.timerInterval);
+                gameState.timerInterval = null;
+            }
+            
+            playSound('win');
+            
+            // Обновляем экран результатов
+            updateResultScreen();
+            
+            // Отмечаем континент как пройденный
+            if (gameState.currentMode === 'continent' && !gameState.completedContinents.includes(gameState.currentContinent)) {
+                gameState.completedContinents.push(gameState.currentContinent);
+                localStorage.setItem('completedContinents', JSON.stringify(gameState.completedContinents));
+            }
+            
+            // Показываем поле для имени только в режиме на время
+            if (gameState.currentMode === 'time') {
+                document.getElementById('nameInputContainer').style.display = 'block';
+            } else {
+                document.getElementById('nameInputContainer').style.display = 'none';
+            }
+            
+            switchScreen('resultScreen');
+        }
+
+        // Обновление экрана результатов
+        function updateResultScreen() {
+            const lang = gameState.language;
+            const timeSpent = gameState.isTimeMode 
+                ? gameState.timeLimit - gameState.timeLeft 
+                : Math.floor((gameState.currentCountryIndex) * 10); // Примерное время
+            
+            // Заголовок
+            let title = translations[lang].congratulations;
+            if (gameState.score === gameState.totalCountries) {
+                title = "🎉 ИДЕАЛЬНО! 🎉";
+            } else if (gameState.score / gameState.totalCountries >= 0.8) {
+                title = "ОТЛИЧНО!";
+            } else if (gameState.score / gameState.totalCountries >= 0.6) {
+                title = "ХОРОШО!";
+            }
+            document.getElementById('resultTitle').textContent = title;
+            
+            // Статистика
+            const resultStats = document.getElementById('resultStats');
+            resultStats.innerHTML = '';
+            
+            const stats = [
+                { title: translations[lang].youCompleted, value: getModeName() },
+                { title: translations[lang].flagsGuessed, value: `${gameState.score}/${gameState.totalCountries}` },
+                { title: translations[lang].correctAnswers, value: `${Math.round((gameState.score / gameState.totalCountries) * 100)}%` }
+            ];
+            
+            if (gameState.isTimeMode) {
+                stats.push({ title: translations[lang].timeSpent, value: `${timeSpent} ${translations[lang].seconds}` });
+            }
+            
+            stats.forEach(stat => {
+                const statElement = document.createElement('div');
+                statElement.className = 'result-stat';
+                statElement.innerHTML = `
+                    <h3>${stat.title}</h3>
+                    <p>${stat.value}</p>
+                `;
+                resultStats.appendChild(statElement);
+            });
+        }
+
+        // Получение названия режима
+        function getModeName() {
+            const lang = gameState.language;
+            
+            switch(gameState.currentMode) {
+                case 'classic': return translations[lang].classicMode;
+                case 'continent': 
+                    const continent = continentsData.find(c => c.id === gameState.currentContinent);
+                    return continent ? continent.name : translations[lang].continentMode;
+                case 'time': return translations[lang].timeMode;
+                default: return '';
+            }
+        }
+
+        // Играть снова
+        function playAgain() {
+            playSound('click');
+            
+            switch(gameState.currentMode) {
+                case 'classic': startClassicMode(); break;
+                case 'continent': startContinentMode(gameState.currentContinent); break;
+                case 'time': switchScreen('timeModeSetup'); break;
+                default: switchScreen('modeSelection');
+            }
+        }
+
+        // Сохранение рекорда
+        function saveRecord() {
+            playSound('click');
+            
+            const playerName = document.getElementById('playerName').value.trim() || 'Аноним';
+            const timeSpent = gameState.timeLimit - gameState.timeLeft;
+            
+            const record = {
+                name: playerName,
+                flags: gameState.score,
+                total: gameState.totalCountries,
+                time: timeSpent,
+                date: new Date().toLocaleDateString(),
+                timestamp: Date.now()
+            };
+            
+            // Загружаем существующие рекорды
+            let records = JSON.parse(localStorage.getItem('flagGameRecords')) || [];
+            
+            // Добавляем новый рекорд
+            records.push(record);
+            
+            // Сортируем по количеству флагов (по убыванию) и времени (по возрастанию)
+            records.sort((a, b) => {
+                if (b.flags !== a.flags) return b.flags - a.flags;
+                return a.time - b.time;
+            });
+            
+            // Оставляем только топ-10
+            records = records.slice(0, 10);
+            
+            // Сохраняем
+            localStorage.setItem('flagGameRecords', JSON.stringify(records));
+            
+            // Показываем уведомление
+            showNotification('Рекорд сохранен!', 'success');
+            
+            // Переключаемся на экран рекордов
+            loadRecords();
+            switchScreen('recordsScreen');
+        }
+
+        // Загрузка рекордов
+        function loadRecords() {
+            const records = JSON.parse(localStorage.getItem('flagGameRecords')) || [];
+            const tbody = document.getElementById('recordsTableBody');
+            const lang = gameState.language;
+            
+            tbody.innerHTML = '';
+            
+            if (records.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 40px;">
+                            <i class="fas fa-trophy" style="font-size: 3rem; color: #aaa; margin-bottom: 15px; display: block;"></i>
+                            <p>Пока нет рекордов. Будьте первым!</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            records.forEach((record, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="rank">${index + 1}</td>
+                    <td>${record.name}</td>
+                    <td>${record.flags}/${record.total}</td>
+                    <td>${record.time} ${translations[lang].seconds}</td>
+                    <td>${record.date}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Выход из игры
+        function exitGame() {
+            playSound('click');
+            
+            if (confirm('Вы уверены, что хотите выйти? Весь прогресс будет потерян.')) {
+                switchScreen('modeSelection');
+            }
+        }
+
+        // Управление звуком
+        function playSound(soundType) {
+            if (!gameState.soundsEnabled) return;
+            
+            const soundMap = {
+                click: document.getElementById('clickSound'),
+                correct: document.getElementById('correctSound'),
+                wrong: document.getElementById('wrongSound'),
+                win: document.getElementById('winSound')
+            };
+            
+            const sound = soundMap[soundType];
+            if (sound) {
+                sound.volume = gameState.soundsVolume;
+                sound.currentTime = 0;
+                sound.play().catch(e => console.log("Не удалось воспроизвести звук:", e));
+            }
+        }
+
+        // Фоновая музыка
+        function playBackgroundMusic() {
+            const bgMusic = document.getElementById('bgMusic');
+            bgMusic.volume = gameState.musicVolume;
+            
+            if (gameState.musicEnabled) {
+                bgMusic.play().catch(e => console.log("Автовоспроизведение музыки заблокировано браузером"));
+            }
+        }
+
+        // Переключение музыки
+        function toggleMusic() {
+            const toggle = document.getElementById('musicToggle');
+            const bgMusic = document.getElementById('bgMusic');
+            
+            gameState.musicEnabled = !gameState.musicEnabled;
+            toggle.classList.toggle('active', gameState.musicEnabled);
+            
+            if (gameState.musicEnabled) {
+                bgMusic.volume = gameState.musicVolume;
+                bgMusic.play().catch(e => console.log("Не удалось воспроизвести музыку"));
+            } else {
+                bgMusic.pause();
+            }
+            
+            saveSettings();
+        }
+
+        // Переключение звуков
+        function toggleSounds() {
+            const toggle = document.getElementById('soundsToggle');
+            gameState.soundsEnabled = !gameState.soundsEnabled;
+            toggle.classList.toggle('active', gameState.soundsEnabled);
+            saveSettings();
+        }
+
+        // Переключение анимаций
+        function toggleAnimations() {
+            const toggle = document.getElementById('animationsToggle');
+            gameState.animationsEnabled = !gameState.animationsEnabled;
+            toggle.classList.toggle('active', gameState.animationsEnabled);
+            
+            // Применяем/убираем анимации
+            document.body.style.animationPlayState = gameState.animationsEnabled ? 'running' : 'paused';
+            document.querySelectorAll('.flag-particle').forEach(flag => {
+                flag.style.animationPlayState = gameState.animationsEnabled ? 'running' : 'paused';
+            });
+            
+            saveSettings();
+        }
+
+        // Обновление громкости музыки
+        function updateMusicVolume() {
+            const slider = document.getElementById('musicVolumeSlider');
+            gameState.musicVolume = slider.value / 100;
+            
+            const bgMusic = document.getElementById('bgMusic');
+            bgMusic.volume = gameState.musicVolume;
+            
+            saveSettings();
+        }
+
+        // Обновление громкости звуков
+        function updateSoundsVolume() {
+            const slider = document.getElementById('soundsVolumeSlider');
+            gameState.soundsVolume = slider.value / 100;
+            saveSettings();
+        }
+
+        // Обновление сложности
+        function updateDifficulty() {
+            const slider = document.getElementById('difficultySlider');
+            const valueSpan = document.getElementById('difficultyValue');
+            const lang = gameState.language;
+            
+            gameState.difficulty = parseInt(slider.value);
+            valueSpan.textContent = `${gameState.difficulty} ${translations[lang].variants}`;
+            
+            saveSettings();
+        }
+
+        // Обновление лимита времени
+        function updateTimeLimit() {
+            const slider = document.getElementById('timeLimitSlider');
+            const valueSpan = document.getElementById('timeLimitValue');
+            const lang = gameState.language;
+            
+            gameState.timeLimit = parseInt(slider.value);
+            valueSpan.textContent = `${gameState.timeLimit} ${translations[lang].seconds}`;
+        }
+
+        // Переключение языка
+        function switchLanguage(lang) {
+            gameState.language = lang;
+            
+            // Обновляем активную кнопку языка
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.lang === lang);
+            });
+            
+            // Обновляем все тексты
+            updateLanguage();
+            saveSettings();
+        }
+
+        // Обновление языка интерфейса
+        function updateLanguage() {
+            const lang = gameState.language;
+            const t = translations[lang];
+            
+            // Обновляем тексты
+            document.querySelectorAll('[data-translate]').forEach(element => {
+                const key = element.dataset.translate;
+                if (t[key]) {
+                    element.textContent = t[key];
+                }
+            });
+            
+            // Обновляем заголовки и кнопки
+            document.getElementById('gameTitle').textContent = t.gameTitle;
+            document.querySelector('.game-subtitle').textContent = t.from;
+            document.getElementById('playBtn').innerHTML = `<i class="fas fa-play"></i> ${t.play}`;
+            document.getElementById('recordsBtn').innerHTML = `<i class="fas fa-trophy"></i> ${t.records}`;
+            document.getElementById('settingsBtn').innerHTML = `<i class="fas fa-cog"></i> ${t.settings}`;
+            
+            // Обновляем экран выбора режима
+            document.querySelector('.mode-selection h2').innerHTML = `<i class="fas fa-gamepad"></i> ${t.selectMode}`;
+            document.querySelector('#classicMode h3').textContent = t.classicMode;
+            document.querySelector('#classicMode p').textContent = t.classicDesc;
+            document.querySelector('#continentMode h3').textContent = t.continentMode;
+            document.querySelector('#continentMode p').textContent = t.continentDesc;
+            document.querySelector('#timeMode h3').textContent = t.timeMode;
+            document.querySelector('#timeMode p').textContent = t.timeDesc;
+            
+            // Обновляем сложность
+            document.getElementById('difficultyValue').textContent = `${gameState.difficulty} ${t.variants}`;
+            document.getElementById('timeLimitValue').textContent = `${gameState.timeLimit} ${t.seconds}`;
+            
+            // Обновляем континенты
+            loadContinents();
+        }
+
+        // Загрузка настроек
+        function loadSettings() {
+            const savedSettings = JSON.parse(localStorage.getItem('flagGameSettings'));
+            
+            if (savedSettings) {
+                gameState.language = savedSettings.language || 'ru';
+                gameState.soundsEnabled = savedSettings.soundsEnabled !== undefined ? savedSettings.soundsEnabled : true;
+                gameState.musicEnabled = savedSettings.musicEnabled !== undefined ? savedSettings.musicEnabled : true;
+                gameState.animationsEnabled = savedSettings.animationsEnabled !== undefined ? savedSettings.animationsEnabled : true;
+                gameState.musicVolume = savedSettings.musicVolume || 0.5;
+                gameState.soundsVolume = savedSettings.soundsVolume || 0.7;
+                gameState.difficulty = savedSettings.difficulty || 4;
+                
+                // Применяем настройки
+                document.getElementById('musicToggle').classList.toggle('active', gameState.musicEnabled);
+                document.getElementById('soundsToggle').classList.toggle('active', gameState.soundsEnabled);
+                document.getElementById('animationsToggle').classList.toggle('active', gameState.animationsEnabled);
+                
+                document.getElementById('musicVolumeSlider').value = gameState.musicVolume * 100;
+                document.getElementById('soundsVolumeSlider').value = gameState.soundsVolume * 100;
+                document.getElementById('difficultySlider').value = gameState.difficulty;
+                
+                // Устанавливаем язык
+                document.querySelectorAll('.lang-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.lang === gameState.language);
+                });
+                
+                // Обновляем язык интерфейса
+                updateLanguage();
+            }
+        }
+
+        // Сохранение настроек
+        function saveSettings() {
+            const settings = {
+                language: gameState.language,
+                soundsEnabled: gameState.soundsEnabled,
+                musicEnabled: gameState.musicEnabled,
+                animationsEnabled: gameState.animationsEnabled,
+                musicVolume: gameState.musicVolume,
+                soundsVolume: gameState.soundsVolume,
+                difficulty: gameState.difficulty
+            };
+            
+            localStorage.setItem('flagGameSettings', JSON.stringify(settings));
+        }
+
+        // Сброс настроек
+        function resetSettings() {
+            if (confirm('Вы уверены, что хотите сбросить все настройки?')) {
+                localStorage.removeItem('flagGameSettings');
+                location.reload();
+            }
+        }
+
+        // Показать уведомление
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
